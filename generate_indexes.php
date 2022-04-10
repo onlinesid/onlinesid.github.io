@@ -5,9 +5,9 @@ $words = json_decode(file_get_contents('./words_dictionary.json'), true);
 $by_length = [];
 foreach ($words as $w => $i) {
     $len = strlen($w);
-    if ($len >= 4 && $len < 16) {
+    //if ($len >= 4 && $len < 16) {
         $by_length['length_'.$len][] = $w;
-    }
+    //}
     echo '.';
 }
 echo "\n";

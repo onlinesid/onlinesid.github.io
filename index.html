@@ -27,10 +27,10 @@
         function find_word() {
             let ul = document.getElementById('word_found');
             ul.innerHTML = '';
-            let searchFor = document.getElementById('word_search').value;
+            let searchFor = (''+document.getElementById('word_search').value).trim().toLowerCase();
             let index = 'length_'+searchFor.length;
             let nb = dictionary[index].length;
-            let excl = document.getElementById('word_excludes').value;
+            let excl = (''+document.getElementById('word_excludes').value).trim().toLowerCase();
             // console.log(index);
             for (let i=0; i < nb; i++) {
                 let w = dictionary[index][i];
