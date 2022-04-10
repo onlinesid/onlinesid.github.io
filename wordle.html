@@ -1,0 +1,201 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Word Finder - onlinesid.github.io</title>
+    <style>
+        #wordle li button {
+            margin-right: 2px;
+        }
+        #wordle li button.del {
+            margin-left: 2px;
+            background: red;
+            color: white;
+        }
+        #wordle li button.wrong {
+            margin-left: 2px;
+            background: darkslategrey;
+            color: white;
+        }
+        #wordle li button.right {
+            margin-left: 2px;
+            background: lightgreen;
+            color: black;
+        }
+        #wordle li button.almost {
+            margin-left: 2px;
+            background: orange;
+            color: black;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Wordle Word Finder</h1>
+
+    <p>Type what you typed in Wordle here</p>
+
+    <p>
+        <input type="text" id="wordle_row"><input type="button" value="Add row" onclick="wordle_add_row()" />
+    </p>
+
+    <ul id="wordle">
+    </ul>
+
+    <button onclick="find_word()">Find words</button>
+
+    <ul id="word_found"></ul>
+
+    <script>
+
+        function wordle_del_row() {
+            this.parentNode.remove();
+        }
+
+        function wordle_cycle() {
+            if (this.className === 'wrong') {
+                this.className = 'almost';
+            } else if (this.className === 'almost') {
+                this.className = 'right';
+            } else {
+                this.className = 'wrong';
+            }
+        }
+
+        function wordle_add_row() {
+            let li = document.createElement('li');
+            let searchFor = (''+document.getElementById('wordle_row').value).trim().toUpperCase();
+            for (let i=0; i < searchFor.length; i++) {
+                let btn = document.createElement('button');
+                btn.textContent = searchFor.charAt(i);
+                btn.className = 'wrong';
+                btn.onclick = wordle_cycle;
+                li.appendChild(btn);
+            }
+            let del = document.createElement('button');
+            del.textContent = '-';
+            del.className = 'del';
+            del.onclick = wordle_del_row;
+            li.appendChild(del);
+            document.getElementById('wordle').appendChild(li);
+            document.getElementById('wordle_row').value = '';
+            document.getElementById('wordle_row').focus();
+        }
+
+        let dictionary = null;
+
+        fetch('./words_dictionary_indexed.json')
+            .then(function (response) {
+                return response.json();
+            }).then(function (data) {
+                dictionary = data;
+                // console.log(dictionary);
+            });
+
+        function find_word() {
+
+            let searchFor = '';
+            let excl = '';
+            let incl = '';
+            let excl_w = [];
+            
+            document.getElementById('wordle').childNodes.forEach(function (wordle) {
+                // console.log('wordle', wordle);
+                searchFor = '';
+                wordle.childNodes.forEach(function (btn, i) {
+                    if (btn.className === 'del') return;
+                    let c = btn.textContent.toLowerCase();
+                    // console.log('c', c);
+                    if (btn.className === 'wrong') {
+                        excl += c;
+                        c = '_';
+                    } else if (btn.className === 'almost') {
+                        incl += c;
+
+                        let es = '';
+                        for (let j=0; j < wordle.childNodes.length-1; j++) {
+                            if (j === i) {
+                                es += c;
+                            } else {
+                                es += '_';
+                            }
+                        }
+                        excl_w.push(es);
+
+                        c = '_';
+                    }
+                    searchFor += c;
+                });
+                console.log('searchFor', searchFor, 'incl', incl, 'excl', excl, 'excl_w', excl_w);
+            });
+
+            let ul = document.getElementById('word_found');
+            ul.innerHTML = '';
+            //let searchFor = ('' + document.getElementById('word_search').value).trim().toLowerCase();
+            let index = 'length_' + searchFor.length;
+            let nb = dictionary[index].length;
+            //let excl = ('' + document.getElementById('word_excludes').value).trim().toLowerCase();
+            //let incl = ('' + document.getElementById('word_includes').value).trim().toLowerCase();
+            //let excl_w = ('' + document.getElementById('word_excludes_word').value).trim().toLowerCase().split(',');
+
+            for (let i = 0; i < nb; i++) {
+                let w = dictionary[index][i];
+                let match = matching(searchFor, w, incl, excl);
+
+                if (match && excl_w.length > 0) {
+                    excl_w.forEach(function (ew) {
+                        if (match && ew.length > 0) {
+                            match = !matching(ew, w, incl, excl);
+                        }
+                    });
+                }
+
+                if (match) {
+                    let li = document.createElement('li');
+                    li.textContent = w;
+                    ul.appendChild(li);
+                }
+            }
+        }
+
+        function matching(searchFor, w, incl, excl) {
+            let match = true;
+            for (let j = 0; j < searchFor.length; j++) {
+
+                let is_wild = searchFor.charAt(j) === '_';
+
+                if (!is_wild && searchFor.charAt(j) !== w.charAt(j)) {
+                    match = false;
+                    break;
+                }
+
+                if (excl.length > 0) {
+                    for (let h = 0; h < w.length; h++) {
+                        if (excl.includes(w.charAt(h))) {
+                            match = false;
+                            break;
+                        }
+                    }
+                }
+
+                if (incl.length > 0) {
+                    for (let h = 0; h < incl.length; h++) {
+                        if (!w.includes(incl.charAt(h))) {
+                            match = false;
+                            break;
+                        }
+                    }
+                }
+
+                if (!match) {
+                    break;
+                }
+            }
+            return match;
+        }
+    </script>
+</body>
+
+</html>
