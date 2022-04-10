@@ -1,99 +1,18 @@
 <html>
 
 <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Website of onlinesid :)</title>
 </head>
 
 <body>
-    <h1>Word finder</h1>
-    <form onsubmit="return false;">
-        <p>Enter a word to search with wildcards like "av__ado" in `Search` and optionally enter characters to exclude
-            in `Excludes chars` or `Excludes words` (e.g.: ber__,____y).</p>
-        Search: <input type="text" name="word_search" id="word_search" placeholder="E.g.: h_llo" /><br />
-        Includes: <input type="text" name="word_includes" id="word_includes" value="" /><br />
-        Excludes chars: <input type="text" name="word_excludes" id="word_excludes" value="" /><br />
-        Excludes words (comma separated, wildcards): <input type="text" name="word_excludes_word" id="word_excludes_word" value="" /><br />
-        <input type="button" value="Search" onclick="find_word()" />
-        <ul id="word_found"></ul>
-    </form>
-    <script>
+    <h1>Hello!</h1>
+    <ul>
+        <li><a href="./word_finder.html">Word Finder</a></li>
+    </ul>
 
-        let dictionary = null;
-
-        fetch('./words_dictionary_indexed.json')
-            .then(function (response) {
-                return response.json();
-            }).then(function (data) {
-                dictionary = data;
-                // console.log(dictionary);
-            });
-
-        function find_word() {
-            let ul = document.getElementById('word_found');
-            ul.innerHTML = '';
-            let searchFor = ('' + document.getElementById('word_search').value).trim().toLowerCase();
-            let index = 'length_' + searchFor.length;
-            let nb = dictionary[index].length;
-            let excl = ('' + document.getElementById('word_excludes').value).trim().toLowerCase();
-            let incl = ('' + document.getElementById('word_includes').value).trim().toLowerCase();
-            let excl_w = ('' + document.getElementById('word_excludes_word').value).trim().toLowerCase().split(',');
-
-            for (let i = 0; i < nb; i++) {
-                let w = dictionary[index][i];
-                let match = matching(searchFor, w, incl, excl);
-
-                if (match && excl_w.length > 0) {
-                    excl_w.forEach(function (ew) {
-                        if (match && ew.length > 0) {
-                            match = !matching(ew, w, incl, excl);
-                        }
-                    });
-                }
-
-                if (match) {
-                    let li = document.createElement('li');
-                    li.textContent = w;
-                    ul.appendChild(li);
-                }
-            }
-        }
-
-        function matching(searchFor, w, incl, excl) {
-            let match = true;
-            for (let j = 0; j < searchFor.length; j++) {
-
-                let is_wild = searchFor.charAt(j) === '_';
-
-                if (!is_wild && searchFor.charAt(j) !== w.charAt(j)) {
-                    match = false;
-                    break;
-                }
-
-                if (excl.length > 0) {
-                    for (let h = 0; h < w.length; h++) {
-                        if (excl.includes(w.charAt(h))) {
-                            match = false;
-                            break;
-                        }
-                    }
-                }
-
-                if (incl.length > 0) {
-                    for (let h = 0; h < incl.length; h++) {
-                        if (!w.includes(incl.charAt(h))) {
-                            match = false;
-                            break;
-                        }
-                    }
-                }
-
-                if (!match) {
-                    break;
-                }
-            }
-            return match;
-        }
-    </script>
 </body>
 
 </html>
