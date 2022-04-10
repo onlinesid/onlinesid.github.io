@@ -6,7 +6,7 @@
     <h1>Word finder</h1>
     <form onsubmit="return false;">
         Search: <input type="text" name="word_search" id="word_search" placeholder="E.g.: h_llo" /><br />
-        Includes: <input type="text" name="word_includes" id="word_includes" value="" /><br />
+        <!-- Includes: <input type="text" name="word_includes" id="word_includes" value="" /><br /> -->
         Excludes: <input type="text" name="word_excludes" id="word_excludes" value="" /><br />
         <input type="button" value="Search" onclick="find_word()" />
         <ul id="word_found"></ul>
@@ -29,14 +29,30 @@
             let searchFor = document.getElementById('word_search').value;
             let index = 'length_'+searchFor.length;
             let nb = dictionary[index].length;
+            let excl = document.getElementById('word_excludes').value;
             // console.log(index);
             for (let i=0; i < nb; i++) {
                 let w = dictionary[index][i];
                 let match = true;
                 for (let j=0; j < searchFor.length; j++) {
-                    if (searchFor.charAt(j) !== '_' && searchFor.charAt(j) !== w.charAt(j)) {
+                    if (searchFor.charAt(j) === '_') continue;
+
+                    if (searchFor.charAt(j) !== w.charAt(j)) {
                         match = false;
                         break;
+                    }
+
+                    if (excl.length) {
+                        for (let h=0; h < w.length; h++) {
+                            if (excl.includes(w.charAt(h))) {
+                                match = false;
+                                break;
+                            }
+                        }
+
+                        if (!match) {
+                            break;
+                        }
                     }
                 }
                 if (match) {
