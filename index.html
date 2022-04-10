@@ -3,6 +3,49 @@
     <title>Website of onlinesid :)</title>
 </head>
 <body>
-    <h1>hello, world</h1>
+    <h1>Word finder</h1>
+    <form onsubmit="return false;">
+        Search: <input type="text" name="word_search" id="word_search" placeholder="E.g.: h_llo" /><br />
+        Includes: <input type="text" name="word_includes" id="word_includes" value="" /><br />
+        Excludes: <input type="text" name="word_excludes" id="word_excludes" value="" /><br />
+        <input type="button" value="Search" onclick="find_word()" />
+        <ul id="word_found"></ul>
+    </form>
+    <script>
+
+        let dictionary = null;
+
+        fetch('./words_dictionary_indexed.json')
+        .then(function (response) {
+            return response.json();
+        }).then(function (data) {
+            dictionary = data;
+            // console.log(dictionary);
+        });
+
+        function find_word() {
+            let ul = document.getElementById('word_found');
+            ul.innerHTML = '';
+            let searchFor = document.getElementById('word_search').value;
+            let index = 'length_'+searchFor.length;
+            let nb = dictionary[index].length;
+            // console.log(index);
+            for (let i=0; i < nb; i++) {
+                let w = dictionary[index][i];
+                let match = true;
+                for (let j=0; j < searchFor.length; j++) {
+                    if (searchFor.charAt(j) !== '_' && searchFor.charAt(j) !== w.charAt(j)) {
+                        match = false;
+                        break;
+                    }
+                }
+                if (match) {
+                    let li = document.createElement('li');
+                    li.textContent = w;
+                    ul.appendChild(li);
+                }
+            }
+        }
+    </script>
 </body>
 </html>
