@@ -1,7 +1,7 @@
 <?php 
 
 $words = json_decode(file_get_contents('./words_dictionary.json'), true);
-
+$words['scalp'] = 1;
 $by_length = [];
 foreach ($words as $w => $i) {
     $len = strlen($w);

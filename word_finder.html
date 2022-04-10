@@ -23,7 +23,7 @@
 
         let dictionary = null;
 
-        fetch('./words_dictionary_indexed.json')
+        fetch('./words_dictionary_indexed.json?r='+Math.random())
             .then(function (response) {
                 return response.json();
             }).then(function (data) {
