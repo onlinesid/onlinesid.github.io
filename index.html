@@ -1,13 +1,16 @@
 <html>
+
 <head>
     <title>Website of onlinesid :)</title>
 </head>
+
 <body>
     <h1>Word finder</h1>
     <form onsubmit="return false;">
-        <p>Enter a word to search with wildcards like "av__ado" in `Search` and optionally enter characters to exclude in `Excludes`.</p>
+        <p>Enter a word to search with wildcards like "av__ado" in `Search` and optionally enter characters to exclude
+            in `Excludes`.</p>
         Search: <input type="text" name="word_search" id="word_search" placeholder="E.g.: h_llo" /><br />
-        <!-- Includes: <input type="text" name="word_includes" id="word_includes" value="" /><br /> -->
+        Includes: <input type="text" name="word_includes" id="word_includes" value="" /><br />
         Excludes: <input type="text" name="word_excludes" id="word_excludes" value="" /><br />
         <input type="button" value="Search" onclick="find_word()" />
         <ul id="word_found"></ul>
@@ -17,43 +20,54 @@
         let dictionary = null;
 
         fetch('./words_dictionary_indexed.json')
-        .then(function (response) {
-            return response.json();
-        }).then(function (data) {
-            dictionary = data;
-            // console.log(dictionary);
-        });
+            .then(function (response) {
+                return response.json();
+            }).then(function (data) {
+                dictionary = data;
+                // console.log(dictionary);
+            });
 
         function find_word() {
             let ul = document.getElementById('word_found');
             ul.innerHTML = '';
-            let searchFor = (''+document.getElementById('word_search').value).trim().toLowerCase();
-            let index = 'length_'+searchFor.length;
+            let searchFor = ('' + document.getElementById('word_search').value).trim().toLowerCase();
+            let index = 'length_' + searchFor.length;
             let nb = dictionary[index].length;
-            let excl = (''+document.getElementById('word_excludes').value).trim().toLowerCase();
-            // console.log(index);
-            for (let i=0; i < nb; i++) {
+            let excl = ('' + document.getElementById('word_excludes').value).trim().toLowerCase();
+            let incl = ('' + document.getElementById('word_includes').value).trim().toLowerCase();
+            console.log(incl);
+            for (let i = 0; i < nb; i++) {
                 let w = dictionary[index][i];
                 let match = true;
-                for (let j=0; j < searchFor.length; j++) {
-                    if (searchFor.charAt(j) === '_') continue;
+                for (let j = 0; j < searchFor.length; j++) {
 
-                    if (searchFor.charAt(j) !== w.charAt(j)) {
+                    let is_wild = searchFor.charAt(j) === '_';
+
+                    if (!is_wild && searchFor.charAt(j) !== w.charAt(j)) {
                         match = false;
                         break;
                     }
 
-                    if (excl.length) {
-                        for (let h=0; h < w.length; h++) {
+                    if (excl.length > 0) {
+                        for (let h = 0; h < w.length; h++) {
                             if (excl.includes(w.charAt(h))) {
                                 match = false;
                                 break;
                             }
                         }
+                    }
 
-                        if (!match) {
-                            break;
+                    if (incl.length > 0) {
+                        for (let h = 0; h < incl.length; h++) {
+                            if (!w.includes(incl.charAt(h))) {
+                                match = false;
+                                break;
+                            }
                         }
+                    }
+
+                    if (!match) {
+                        break;
                     }
                 }
                 if (match) {
@@ -65,4 +79,5 @@
         }
     </script>
 </body>
+
 </html>
