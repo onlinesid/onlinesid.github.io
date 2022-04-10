@@ -8,11 +8,11 @@
     <h1>Word finder</h1>
     <form onsubmit="return false;">
         <p>Enter a word to search with wildcards like "av__ado" in `Search` and optionally enter characters to exclude
-            in `Excludes chars` or `Excludes word` (e.g.: ber__).</p>
+            in `Excludes chars` or `Excludes words` (e.g.: ber__,____y).</p>
         Search: <input type="text" name="word_search" id="word_search" placeholder="E.g.: h_llo" /><br />
         Includes: <input type="text" name="word_includes" id="word_includes" value="" /><br />
         Excludes chars: <input type="text" name="word_excludes" id="word_excludes" value="" /><br />
-        Excludes word: <input type="text" name="word_excludes_word" id="word_excludes_word" value="" /><br />
+        Excludes words (comma separated, wildcards): <input type="text" name="word_excludes_word" id="word_excludes_word" value="" /><br />
         <input type="button" value="Search" onclick="find_word()" />
         <ul id="word_found"></ul>
     </form>
