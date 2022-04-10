@@ -128,13 +128,13 @@
                     }
 
                     // check excludes, ensure nothing excluded that is included
-                    let tmp = excl;
-                    excl = '';
-                    for (let i=0; i < excl.length; i++) {
-                        if (!incl.includes(tmp.charAt(i))) {
-                            excl += tmp.charAt(i);
-                        }
-                    }
+                    // let tmp = excl;
+                    // excl = '';
+                    // for (let i=0; i < excl.length; i++) {
+                    //    if (!incl.includes(tmp.charAt(i))) {
+                    //        excl += tmp.charAt(i);
+                    //    }
+                    // }
 
                     searchFor += c;
                 });
@@ -183,7 +183,7 @@
 
                 if (excl.length > 0) {
                     for (let h = 0; h < w.length; h++) {
-                        if (excl.includes(w.charAt(h))) {
+                        if (excl.includes(w.charAt(h)) && !incl.includes(w.charAt(h))) {
                             match = false;
                             break;
                         }
