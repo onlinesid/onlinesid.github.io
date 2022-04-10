@@ -126,6 +126,16 @@
 
                         c = '_';
                     }
+
+                    // check excludes, ensure nothing excluded that is included
+                    let tmp = excl;
+                    excl = '';
+                    for (let i=0; i < excl.length; i++) {
+                        if (!incl.includes(tmp.charAt(i))) {
+                            excl += tmp.charAt(i);
+                        }
+                    }
+
                     searchFor += c;
                 });
                 console.log('searchFor', searchFor, 'incl', incl, 'excl', excl, 'excl_w', excl_w);
