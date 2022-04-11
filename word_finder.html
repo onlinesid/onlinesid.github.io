@@ -73,7 +73,7 @@
 
                 if (excl.length > 0) {
                     for (let h = 0; h < w.length; h++) {
-                        if (excl.includes(w.charAt(h))) {
+                        if (excl.includes(w.charAt(h)) && !incl.includes(w.charAt(h))) {
                             match = false;
                             break;
                         }
