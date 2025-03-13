@@ -55,7 +55,7 @@
             border-left: 0;
         }
 
-        /* Hot Air Balloon Animation Styles */
+        /* Hot Air Balloon and Cloud Animation Styles */
         #balloon-bg {
             position: absolute;
             top: 0;
@@ -82,6 +82,21 @@
                 opacity: 0.5;
             }
         }
+
+        .cloud {
+            animation: drift linear infinite;
+            opacity: 0.5; /* Semi-transparent */
+            fill: #ffffff; /* White clouds */
+        }
+
+        @keyframes drift {
+            0% {
+                transform: translateX(-100%);
+            }
+            100% {
+                transform: translateX(100vw);
+            }
+        }
     </style>
 </head>
 <body>
@@ -103,7 +118,7 @@
         </div>
     </nav>
 
-    <!-- Hero Section with Hot Air Balloon Animation -->
+    <!-- Hero Section with Hot Air Balloon and Cloud Animation -->
     <section class="hero-section text-dark">
         <svg id="balloon-bg"></svg>
         <div class="container" style="z-index: 2; position: relative;">
@@ -224,7 +239,7 @@
                     <ul class="list-unstyled">
                         <li><a href="#">Our Story</a></li>
                         <li><a href="#">Team</a></li>
-                        < crumbledli><a href="#">Careers</a></li>
+                        <li><a href="#">Careers</a></li>
                         <li><a href="#">Press</a></li>
                     </ul>
                 </div>
@@ -267,7 +282,7 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Hot Air Balloon Animation Script -->
+    <!-- Hot Air Balloon and Cloud Animation Script -->
     <script>
         const svg = document.getElementById('balloon-bg');
         const heroSection = document.querySelector('.hero-section');
@@ -294,6 +309,7 @@
             const sway = Math.random() * 50 - 25; // -25 to 25px sway
             const colorSet = colors[Math.floor(Math.random() * colors.length)];
             const letter = String.fromCharCode(65 + Math.floor(Math.random() * 26)); // A-Z
+            const zIndex = Math.random() < 0.5 ? 0 : 2; // Randomly behind (0) or in front (2) of clouds
 
             // Define clip paths for curved separators
             const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
@@ -387,6 +403,7 @@
             group.style.transformOrigin = 'center';
             group.style.animationTimingFunction = 'ease-in-out';
             group.style.transform = `translateX(${sway}px)`;
+            group.style.zIndex = zIndex; // Set z-index for layering with clouds
 
             svg.appendChild(group);
 
@@ -396,19 +413,46 @@
                     group.parentNode.removeChild(group);
                 }
             }, duration * 1000);
-
-            // Return random delay for next spawn (3-5 seconds)
-            return 3000 + Math.random() * 2000;
         }
 
-        // Recursive spawning with random delay
-        function spawnBalloon() {
-            createBalloon();
-            setTimeout(spawnBalloon, 3000 + Math.random() * 2000); // 3-5 seconds
+        // Function to create a cloud
+        function createCloud() {
+            const cloud = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            const size = 100 + Math.random() * 50; // 100-150px
+            const x = -size; // Start off-screen left
+            const y = Math.random() * (height - size); // Random vertical position
+            const duration = 20 + Math.random() * 10; // 20-30 seconds for slower drift
+            const zIndex = Math.random() < 0.5 ? 0 : 2; // Randomly behind (0) or in front (2) of balloons
+
+            // Simple cloud shape using a path
+            cloud.setAttribute('d', `
+                M${size * 0.2},${size * 0.6}
+                Q${size * 0.3},${size * 0.4} ${size * 0.5},${size * 0.5}
+                Q${size * 0.7},${size * 0.4} ${size * 0.8},${size * 0.6}
+                Q${size * 0.9},${size * 0.8} ${size * 0.7},${size * 0.9}
+                Q${size * 0.5},${size} ${size * 0.3},${size * 0.9}
+                Q${size * 0.1},${size * 0.8} ${size * 0.2},${size * 0.6}
+                Z
+            `);
+            cloud.setAttribute('class', 'cloud');
+            cloud.setAttribute('transform', `translate(${x}, ${y})`);
+            cloud.style.animationDuration = `${duration}s`;
+            cloud.style.zIndex = zIndex; // Set z-index for layering
+
+            svg.appendChild(cloud);
+
+            // Remove after animation
+            setTimeout(() => {
+                if (cloud.parentNode) {
+                    cloud.parentNode.removeChild(cloud);
+                }
+            }, duration * 1000);
         }
 
-        // Start the spawning process
-        spawnBalloon();
+        // Start animations
+        createBalloon(); // First balloon immediately
+        setInterval(createBalloon, 3000 + Math.random() * 2000); // One balloon every 3-5 seconds
+        setInterval(createCloud, 2000); // One cloud every 2 seconds
 
         // Adjust SVG size on window resize
         window.addEventListener('resize', () => {
