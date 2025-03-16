@@ -6,15 +6,33 @@
         body { margin: 0; overflow: hidden; display: flex; justify-content: center; align-items: center; height: 100vh; background: #333; }
         canvas { display: none; }
         #ui { position: absolute; top: 10px; left: 10px; color: white; font-family: Arial, sans-serif; }
-        #playButton { font-size: 24px; padding: 10px 20px; cursor: pointer; }
+        #playScreen { text-align: center; color: white; font-family: Arial, sans-serif; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        #playButton { font-size: 24px; padding: 10px 20px; cursor: pointer; margin-top: 20px; }
+        #instructions { font-size: 18px; max-width: 400px; margin: 0 auto; }
+        #instructions ul { list-style-position: inside; padding: 0; }
+        #kills { display: none; }
         #gameOver { display: none; font-size: 36px; color: red; text-align: center; }
     </style>
 </head>
 <body>
     <div id="ui">
-        <button id="playButton">Play</button>
         <div id="kills">Enemies Killed: 0</div>
         <div id="gameOver">Game Over!<br>Enemies Killed: <span id="finalKills">0</span></div>
+    </div>
+    <div id="playScreen">
+        <h1>Voxel Shooter</h1>
+        <div id="instructions">
+            <p><strong>How to Play:</strong></p>
+            <ul>
+                <li><strong>Move:</strong> W (forward), S (back), A (left), D (right)</li>
+                <li><strong>Run:</strong> Hold Shift while moving</li>
+                <li><strong>Jump:</strong> Spacebar</li>
+                <li><strong>Look:</strong> Move mouse left/right (click to lock, Esc to unlock)</li>
+                <li><strong>Shoot:</strong> Left-click to fire at enemies</li>
+                <li><strong>Goal:</strong> Survive enemy attacks and kill as many as possible!</li>
+            </ul>
+        </div>
+        <button id="playButton">Play</button>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
     <script>
@@ -29,6 +47,7 @@
 
         // UI elements
         const playButton = document.getElementById('playButton');
+        const playScreen = document.getElementById('playScreen');
         const killsDisplay = document.getElementById('kills');
         const gameOverScreen = document.getElementById('gameOver');
         const finalKillsDisplay = document.getElementById('finalKills');
@@ -216,10 +235,33 @@
         const characterBox = new THREE.Box3();
         const projectileBox = new THREE.Box3();
 
+        // Pointer Lock (Mouse Capture)
+        let isPointerLocked = false;
+        document.addEventListener('click', () => {
+            if (gameStarted && !isPointerLocked) {
+                renderer.domElement.requestPointerLock();
+            }
+        });
+        document.addEventListener('pointerlockchange', () => {
+            isPointerLocked = document.pointerLockElement === renderer.domElement;
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && isPointerLocked) {
+                document.exitPointerLock();
+            }
+            if (!gameStarted) return;
+            if (e.key.toLowerCase() in keys) keys[e.key.toLowerCase()] = true;
+            if (e.key === ' ' && !isJumping) {
+                keys.space = true;
+                velocityY = jumpStrength;
+                isJumping = true;
+            }
+        });
+
         // Event listeners
         playButton.addEventListener('click', () => {
             gameStarted = true;
-            playButton.style.display = 'none';
+            playScreen.style.display = 'none';
             killsDisplay.style.display = 'block';
             renderer.domElement.style.display = 'block';
             character.userData.health = 10;
@@ -233,22 +275,13 @@
             createEnemy(0, 15);
         });
 
-        document.addEventListener('keydown', (e) => {
-            if (!gameStarted) return;
-            if (e.key.toLowerCase() in keys) keys[e.key.toLowerCase()] = true;
-            if (e.key === ' ' && !isJumping) {
-                keys.space = true;
-                velocityY = jumpStrength;
-                isJumping = true;
-            }
-        });
         document.addEventListener('keyup', (e) => {
             if (!gameStarted) return;
             if (e.key.toLowerCase() in keys) keys[e.key.toLowerCase()] = false;
         });
         document.addEventListener('mousemove', (e) => {
-            if (!gameStarted) return;
-            mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+            if (!gameStarted || !isPointerLocked) return;
+            mouseX += e.movementX * 0.002; // Accumulate infinitely
         });
         document.addEventListener('contextmenu', (e) => e.preventDefault());
         document.addEventListener('mousedown', (e) => {
@@ -302,7 +335,7 @@
         }
 
         function spawnRandomEnemy() {
-            if (enemies.length < 5) { // Cap at 5 enemies
+            if (enemies.length < 5) {
                 const angle = Math.random() * Math.PI * 2;
                 const radius = 15 + Math.random() * 10;
                 const x = Math.cos(angle) * radius;
@@ -344,7 +377,8 @@
                         gameOverScreen.style.display = 'block';
                         finalKillsDisplay.textContent = kills;
                         renderer.domElement.style.display = 'none';
-                        playButton.style.display = 'block';
+                        playScreen.style.display = 'block';
+                        document.exitPointerLock();
                     }
                     scene.remove(projectile);
                     enemyProjectiles.splice(i, 1);
@@ -396,7 +430,7 @@
             }
 
             // Character rotation
-            characterRotation = -mouseX * Math.PI;
+            characterRotation = -mouseX; // No clamping for infinite turning
             character.rotation.y = characterRotation;
 
             // Horizontal Movement
@@ -489,7 +523,6 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        killsDisplay.style.display = 'none';
         animate();
     </script>
 </body>
